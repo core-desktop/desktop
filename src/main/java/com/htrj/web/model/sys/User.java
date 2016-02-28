@@ -2,8 +2,10 @@ package com.htrj.web.model.sys;
 
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+
 import com.htrj.core.model.Model;
 
 /**
@@ -14,9 +16,12 @@ import com.htrj.core.model.Model;
 @Entity
 @Table(name = "t_user")
 public class User extends Model {
+	@Column(length = 50)
 	private String username;
+	@Column(length = 100)
 	private String password;
 	private Date registertime;
+	@Column(length = 50)
 	private String status;
 
 	public String getUsername() {
