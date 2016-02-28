@@ -17,6 +17,7 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.Transformers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import com.htrj.core.util.JqGridPage;
@@ -29,6 +30,9 @@ public class BaseDao implements BaseDaoI {
 	@Qualifier("sessionFactory")
 	private SessionFactory sessionFactory;
 	
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
+	
 	/**
 	 * 获得当前事物的session
 	 * 
@@ -36,6 +40,10 @@ public class BaseDao implements BaseDaoI {
 	 */
 	public Session getSession() {
 		return sessionFactory.getCurrentSession();
+	}
+	
+	public JdbcTemplate getJdbcTemplate() {
+		return jdbcTemplate;
 	}
 	
 	//接口实现方法
