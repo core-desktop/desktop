@@ -10,13 +10,13 @@ import org.junit.Test;
  *
  */
 public class Auto  {
-	@Test
-	public void create() throws Exception{
+	
+	public static void main(String[] args) throws Exception{
 		Map<String, String> maps = new HashMap<String, String>();
 		maps.put("cls", "model.sys.User");
 		maps.put("desc", "用户");
 		maps.put("cextend", "BaseController");
-		maps.put("appPath", "E:/workspace/desktop/src/main/java/");
+		maps.put("appPath", "D:\\resoures\\workspace-my.2\\desktop/src/main/java/");
 		maps.put("package", "com.htrj.web");
 		
 		com.htrj.core.util.Auto.init();
