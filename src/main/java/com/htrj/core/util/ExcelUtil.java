@@ -2,6 +2,8 @@ package com.htrj.core.util;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,13 +12,12 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 
-import jxl.Cell;
-import jxl.Sheet;
-import jxl.Workbook;
-import jxl.write.Label;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
+
 
 public class ExcelUtil {
 	
@@ -26,30 +27,25 @@ public class ExcelUtil {
 	 * @param path excel文件存放路径
 	 */
 	public static void ExportExcel(Class<?> clazz,String path){
-		try{
-			
+		try {
 			Field[] fields=clazz.getDeclaredFields();	
 			//获取类名
 			String modelname=clazz.getName().toString().substring(clazz.getName().toString().lastIndexOf(".")+1);
 			
-			File file =new File(path+modelname+".xls");
-			if(!file.exists()){
-				//file.mkdir();
-				file.createNewFile();
-			}
-			WritableWorkbook book= Workbook.createWorkbook(file);
-			WritableSheet sheet=book.createSheet("数据", 0);
-			for (int i=0,j=1;i<fields.length;i++){
+			Workbook book = new HSSFWorkbook();
+			Sheet sheet= book.createSheet("数据");
+			for (int i = 0, j = 1; i < fields.length; i++) {
 				String xtype=fields[i].getType().getName().toString().substring(fields[i].getType().getName().toString().lastIndexOf(".")+1);
-				Label labelname=new Label(0,j,fields[i].getName().toString());
-				Label labelxtype=new Label(1,j,xtype);
-				sheet.addCell(labelname);
-				sheet.addCell(labelxtype);
+				Row row = sheet.createRow(j);
+				row.createCell(0).setCellValue(fields[i].getName().toString());
+				row.createCell(1).setCellValue(xtype);
 				j++;
 			}
-			book.write();
+			FileOutputStream os = new FileOutputStream(path + modelname + ".xls");
+			book.write(os);
+			os.close();
 			book.close();
-		}catch(Exception e){
+		} catch(Exception e){
 			System.out.println(e.getMessage());
 		}
 	}
@@ -112,12 +108,12 @@ public class ExcelUtil {
 			System.out.println("file in not exists!");
 			return null;
 		}		
-		try{
+		/*try{
 			Workbook book = Workbook.getWorkbook(file);
-			Sheet[] sheet=book.getSheets();
+			Sheet[] sheet = book.getSheets();
 			if(sheet !=null&& sheet.length>0){
 				for(int s=0;s<sheet.length;s++){	
-					List<String> field=new ArrayList();	
+					List<String> field = new ArrayList();
 					for(int r=0;r<sheet[s].getRows();r++){
 						Cell[] cell=sheet[s].getRow(r);						
 						if(r==0){									
@@ -155,7 +151,7 @@ public class ExcelUtil {
 			}
 		}catch(Exception e){
 			e.printStackTrace();
-		}
+		}*/
 		return list;
 	}
 	/**
@@ -166,29 +162,26 @@ public class ExcelUtil {
 	 */
 	public static void genExcel(Class clazz, List<Object> list,String outputPath) {
 		try {
-			File file = new File(outputPath+clazz.getName()+".xls");
-			if (!file.exists()) {
-				file.createNewFile();
-			}
-			WritableWorkbook book = Workbook.createWorkbook(file);
-			WritableSheet sheet = book.createSheet("数据", 0);
+			Workbook book = new HSSFWorkbook();
+			Sheet sheet = book.createSheet("数据");
 			Field[] fields = clazz.getDeclaredFields();
+			Row row = sheet.getRow(0);
 			for (int i = 0; i < fields.length; i++) {
-				Label labelname = new Label(i, 0, fields[i].getName()
-						.toString());
-				sheet.addCell(labelname);
+				row.createCell(i).setCellValue(fields[i].getName().toString());
 			}
 			int r = 1;
 			for (Object p : list) {
 				int c = 0;
+				row = sheet.createRow(r);
 				for (Field f : fields) {
-					Label label = new Label(c, r,(String) PropertyUtils.getProperty(p, f.getName()));
-					sheet.addCell(label);
+					row.createCell(c).setCellValue(String.valueOf(PropertyUtils.getProperty(p, f.getName())));
 					c++;
 				}
 				r++;
 			}
-			book.write();
+			FileOutputStream os = new FileOutputStream(outputPath+clazz.getName()+".xls");
+			book.write(os);
+			os.close();
 			book.close();
 
 		} catch (Exception e) {
@@ -203,27 +196,27 @@ public class ExcelUtil {
 	 */
 	public static void ExcelOutput(Class clazz, List list,File file){
 		try {			
-			WritableWorkbook book = Workbook.createWorkbook(file);
-			WritableSheet sheet = book.createSheet("数据", 0);
+			Workbook book = new HSSFWorkbook();
+			Sheet sheet = book.createSheet("数据");
 			Field[] fields = clazz.getDeclaredFields();
+			Row row = sheet.createRow(0);
 			for (int i = 0; i < fields.length; i++) {
-				Label labelname = new Label(i, 0, fields[i].getName()
-						.toString());
-				sheet.addCell(labelname);
+				row.createCell(i).setCellValue(fields[i].getName().toString());
 			}
 			int r = 1;
 			for (Object p : list) {
 				int c = 0;
+				row = sheet.createRow(r);
 				for (Field f : fields) {
-					Label label = new Label(c, r,String.valueOf(PropertyUtils.getProperty(p, f.getName())));
-					sheet.addCell(label);
+					row.createCell(c).setCellValue(String.valueOf(PropertyUtils.getProperty(p, f.getName())));
 					c++;
 				}
 				r++;
 			}
-			book.write();
+			FileOutputStream os = new FileOutputStream(file);
+			book.write(os);
+			os.close();
 			book.close();
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
